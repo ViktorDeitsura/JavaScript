@@ -15,6 +15,7 @@
     };
 
     Game.prototype.init = function() {
+        var self = this;
         this.showSprites( GameData.sprites.background, this.group );
 
         var tileBackX = Consts.TILE_COORD_X;
@@ -23,8 +24,8 @@
         for ( var j = 0; j < 4; j++ ) {
             for ( var i = 0; i < 4; i++ ) {
                 var tileParams = GameData.sprites.tileBackgr;
-                tileParams.x = tileBackX + 88 * i;
-                tileParams.y = tileBackY + 88 * j;
+                tileParams.x = tileBackX + Consts.DISTANCE_BETWEEN_TILES * i;
+                tileParams.y = tileBackY + Consts.DISTANCE_BETWEEN_TILES * j;
                 this.showSprites( tileParams, this.group );
             }
         }
@@ -37,12 +38,18 @@
 
         for ( var i = 0; i < 2; i++ ) {
             var tileIndex = this.spawnTileInRandomPlace();
-            var x = tileBackX + 88 * tileIndex[1];
-            var y = tileBackY + 88 * tileIndex[0];
+            var x = tileBackX + Consts.DISTANCE_BETWEEN_TILES * tileIndex[1];
+            var y = tileBackY + Consts.DISTANCE_BETWEEN_TILES * tileIndex[0];
             var tile = new Tile( this.tilesGroup, x, y, tileIndex )
-            this.tilesOnField[tileIndex[0]][tileIndex[1]] = tileIndex;
+            this.tilesOnField[tileIndex[0]][tileIndex[1]] = tile;
             this.tilesObj.push( tile );
         }
+
+        this.group.buttonMode = true;
+        this.group.interactive = true;
+        this.group.on( "pointerdown", function(e){ self.onClickDown(e); } );
+        this.group.on( "pointerup",   function(e){ self.onClickUp  (e); } );
+        console.log(this.group);
     };
 
     Game.prototype.showSprites = function( _spriteParams, _container ) {//create textute sprite with the given parameters
@@ -78,4 +85,36 @@
         var randomIndex = Math.floor( Math.random() * freePlace.length );
 
         return freePlace[randomIndex];
+    };
+
+    Game.prototype.onClickDown = function( _evt ) {
+        console.log(this);
+        this.eventClickX = Math.floor( _evt.data.global.x );
+        this.eventClickY = Math.floor( _evt.data.global.y );
+    };
+
+    Game.prototype.onClickUp = function( _evt ) {
+        var x = Math.floor( _evt.data.global.x );
+        var y = Math.floor( _evt.data.global.y );
+        var diffX = Math.abs( this.eventClickX - x );
+        var diffY = Math.abs( this.eventClickY - y );
+
+        if ( diffX > diffY && diffX > Consts.DISTANCE_BETWEEN_TILES ) {
+            if ( x > this.eventClickX ) {//moveRight
+                this.makeStep( Consts.STEP_DIRECTION_RIGHT );
+            } else {//moveLeft
+                this.makeStep( Consts.STEP_DIRECTION_LEFT );
+            }
+        } else if ( diffY > diffX && diffY > Consts.DISTANCE_BETWEEN_TILES ) {
+            if ( y > this.eventClickY ) {//moveDown
+                this.makeStep( Consts.STEP_DIRECTION_DOWN );
+            } else {//moveUp
+                this.makeStep( Consts.STEP_DIRECTION_UP );
+            }
+        }
+
+    };
+
+    Game.prototype.makeStep = function( _direction ) {
+
     };
