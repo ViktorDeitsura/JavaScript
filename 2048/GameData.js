@@ -9,5 +9,5 @@
         tileBackgr: { imagePath:"./images/tiles/tileBackgr.png", x:0,   y:0 },
         tile2:      { imagePath:"./images/tiles/tile2.png",      x:0,   y:0 },
         tile4:      { imagePath:"./images/tiles/tile4.png",      x:0,   y:0 },
-
+        tile8:      { imagePath:"./images/tiles/tile8.png",      x:0,   y:0 },
     };

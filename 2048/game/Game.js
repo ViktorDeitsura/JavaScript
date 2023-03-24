@@ -99,13 +99,13 @@
         var diffX = Math.abs( this.eventClickX - x );
         var diffY = Math.abs( this.eventClickY - y );
 
-        if ( diffX > diffY && diffX > Consts.DISTANCE_BETWEEN_TILES ) {
+        if ( diffX > diffY && diffX > Consts.DISTANCE_BETWEEN_TILES/2 ) {
             if ( x > this.eventClickX ) {//moveRight
                 this.makeStep( Consts.STEP_DIRECTION_RIGHT );
             } else {//moveLeft
                 this.makeStep( Consts.STEP_DIRECTION_LEFT );
             }
-        } else if ( diffY > diffX && diffY > Consts.DISTANCE_BETWEEN_TILES ) {
+        } else if ( diffY > diffX && diffY > Consts.DISTANCE_BETWEEN_TILES/2 ) {
             if ( y > this.eventClickY ) {//moveDown
                 this.makeStep( Consts.STEP_DIRECTION_DOWN );
             } else {//moveUp
@@ -116,5 +116,67 @@
     };
 
     Game.prototype.makeStep = function( _direction ) {
+        if ( _direction == Consts.STEP_DIRECTION_LEFT ) {
+            for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+                for ( var i = 0; i < this.tilesOnField[j].length; i++ ) {
+                    var tile = this.tilesOnField[j][i];
+                    if ( tile != null && i != 0 ) {
+                        this.tileHandlerLeft( tile, this.tilesOnField[j], i );
+                    }
+                }
+            }
+        } else if ( _direction == Consts.STEP_DIRECTION_RIGHT ) {
+            for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+                for ( var i = this.tilesOnField[j].length-1; i >= 0; i-- ) {
+                    var tile = this.tilesOnField[j][i];
+                    if ( tile != null && i != 3 ) {
+                        this.tileHandlerRight( tile, this.tilesOnField[j], i );
+                    }
+                }
+            }
+        } else if ( _direction == Consts.STEP_DIRECTION_DOWN ) {
 
+        } else if ( _direction == Consts.STEP_DIRECTION_UP ) {
+
+        }
+    };
+
+    Game.prototype.tileHandlerLeft = function( _tile, _arr, _numpos ) {
+        var x = 0;
+        for ( var i = _numpos-1; i >= 0; i-- ) {
+            if ( _arr[i] == null ) {
+                x -= Consts.DISTANCE_BETWEEN_TILES;
+                _arr[i] = _tile;
+                _arr[i+1] = null;
+            } else {
+                if ( _tile.count == _arr[i].count ) {
+                    _tile = this.mergeTiles( _arr[i] ,_tile );//new tile continues handling
+                    x = 0;//reset value
+                } else {
+                    break;
+                }
+            }
+        }
+        x = _tile.x + x;
+        _tile.move( x );
+    };
+
+    Game.prototype.tileHandlerRight = function( _tile, _arr, _numpos ) {
+        var x = 0;
+        for ( var i = _numpos+1; i < _arr.length; i++ ) {
+            if ( _arr[i] == null ) {
+                x += Consts.DISTANCE_BETWEEN_TILES;
+                _arr[i] = _tile;
+                _arr[i-1] = null;
+            } else {
+                if ( _tile.count == _arr[i].count ) {
+                    _tile = this.mergeTiles( _arr[i], _tile );//new tile continues handling
+                    x = 0;//reset value
+                } else {
+                    break;
+                }
+            }
+        }
+        x = _tile.x + x;
+        _tile.move( x );
     };
