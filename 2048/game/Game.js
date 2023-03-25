@@ -91,6 +91,7 @@
         var tile = new Tile( this.tilesGroup, x, y, _tileIndex )
         this.tilesOnField[_tileIndex[0]][_tileIndex[1]] = tile;
         this.tilesObj.push( tile );
+        this.checkGameOver();
     };
 
     Game.prototype.onClickDown = function( _evt ) {
@@ -287,6 +288,7 @@
         _absorbe.merge = true;
         _infuse.merge = true;
         _absorbe.count = _infuse.count + _absorbe.count;//write new count in tile
+
         var onMoveComplete = function() {//destroy old tile and show new tile
             _infuse.destroy();//destroy tile sprite
             _absorbe.show();//update tile sprite
@@ -309,8 +311,68 @@
                 i--;
             } else if ( this.tilesObj[i].merge ) {
                 this.tilesObj[i].merge = false;
+                if ( this.tilesObj[i].count == Consts.WIN_COUNT_NUMBER ) {
+                    window.alert("Уровень пройден");
+                    this.startNewGame();
+                    break;
+                }
             }
             rere++;
         }
         console.log(rere);
+    };
+
+    Game.prototype.checkGameOver = function() {
+        var gameOver = true;
+        for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+            if ( !gameOver ) {
+                break;
+            }
+            for ( var i = 0; i < this.tilesOnField.length; i++ ) {
+                if ( this.tilesOnField[j][i] == null ) {
+                    gameOver = false
+                    break;
+                }
+                if ( i < 3 && this.tilesOnField[j][i] != null && this.tilesOnField[j][i+1] != null
+                    && this.tilesOnField[j][i].count == this.tilesOnField[j][i+1].count ) {
+                    gameOver = false
+                    break;
+                }
+            }
+        }
+
+        if ( gameOver ) {
+            for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+                if ( !gameOver ) {
+                    break;
+                }
+                for ( var i = 0; i < this.tilesOnField.length; i++ ) {
+                    if ( i < 3 && this.tilesOnField[i][j] != null && this.tilesOnField[i+1][j] != null
+                        && this.tilesOnField[i][j].count == this.tilesOnField[i+1][j].count ) {
+                        gameOver = false
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( gameOver ) {
+            window.alert("Нельзя сделать ход");
+            this.startNewGame();
+        }
+    };
+
+    Game.prototype.startNewGame = function() {
+        this.group.removeChildren();
+        this.tilesOnField = [
+                                [null, null, null, null],
+                                [null, null, null, null],
+                                [null, null, null, null],
+                                [null, null, null, null]
+                            ];
+        this.tilesObj = [];
+        this.spawnTileSys = false;
+        this.animation = false;
+
+        this.init();
     };

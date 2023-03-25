@@ -10,3 +10,5 @@
     Consts.STEP_DIRECTION_DOWN  = "down";
 
     Consts.DISTANCE_BETWEEN_TILES = 88;
+
+    Consts.WIN_COUNT_NUMBER = 2048;
