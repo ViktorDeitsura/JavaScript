@@ -27,7 +27,7 @@
         this.sprite = Main.game.showSprites( spriteObj, this.group );
     };
 
-    Tile.prototype.move = function( _x, _y, _pos ) {
+    Tile.prototype.move = function( _x, _y, _pos, _callback ) {
         if ( _x == null ) {
             _x = this.x;
         }
@@ -35,7 +35,9 @@
             _y = this.y;
         }
         var onComplete = function() {
-
+            if ( _callback != null ) {
+                _callback();
+            }
         };
         gsap.to( this.group, Consts.TILE_ANIMATION_SPEED, { x:_x, y:_y, onComplete:onComplete } );
     };
