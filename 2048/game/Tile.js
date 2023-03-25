@@ -15,6 +15,7 @@
         this.x = _x;
         this.y = _y;
         this.position = _pos;
+        this.merge = false;//this property disables merged tiles
 
         this.show();
     };
@@ -28,6 +29,7 @@
     };
 
     Tile.prototype.move = function( _x, _y, _pos, _callback ) {
+        Main.game.animation = true;
         if ( _x == null ) {
             _x = this.x;
         }
@@ -38,14 +40,24 @@
             if ( _callback != null ) {
                 _callback();
             }
+            if ( Main.game.spawnTileSys ) {
+                Main.game.spawnTileSys = false;
+                console.log("Main.game.spawnTileSys");
+                var tileIndex = Main.game.searchFreePlaceForTile();
+                Main.game.addTileToField( tileIndex );
+                Main.game.renewalObjectTiles();
+                Main.game.animation = false;
+            }
         };
         gsap.to( this.group, Consts.TILE_ANIMATION_SPEED, { x:_x, y:_y, onComplete:onComplete } );
     };
 
     Tile.prototype.destroy = function() {
-        this.sprite.removeChildren();
-        this.sprite.visible = false;
-        this.sprite = null;
+        if ( this.sprite != null ) {
+            this.sprite.removeChildren();
+            this.sprite.visible = false;
+            this.sprite = null;
+        }
     };
 
     Object.defineProperty( Tile.prototype, "name", {

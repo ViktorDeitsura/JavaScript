@@ -12,6 +12,8 @@
                                 [null, null, null, null]
                             ];
         this.tilesObj = [];
+        this.spawnTileSys = false;
+        this.animation = false;
     };
 
     Game.prototype.init = function() {
@@ -37,12 +39,8 @@
         this.tilesGroup = groupTiles;
 
         for ( var i = 0; i < 2; i++ ) {
-            var tileIndex = this.spawnTileInRandomPlace();
-            var x = tileBackX + Consts.DISTANCE_BETWEEN_TILES * tileIndex[1];
-            var y = tileBackY + Consts.DISTANCE_BETWEEN_TILES * tileIndex[0];
-            var tile = new Tile( this.tilesGroup, x, y, tileIndex )
-            this.tilesOnField[tileIndex[0]][tileIndex[1]] = tile;
-            this.tilesObj.push( tile );
+            var tileIndex = this.searchFreePlaceForTile();
+            this.addTileToField( tileIndex );
         }
 
         this.group.buttonMode = true;
@@ -64,7 +62,7 @@
         return sprite;
     };
 
-    Game.prototype.spawnTileInRandomPlace = function() {
+    Game.prototype.searchFreePlaceForTile = function() {
         var freePlace = [];
         for ( var j = 0; j < 4; j++ ) {
             for ( var i = 0; i < 4; i++ ) {
@@ -87,13 +85,27 @@
         return freePlace[randomIndex];
     };
 
+    Game.prototype.addTileToField = function( _tileIndex ) {
+        var x = Consts.TILE_COORD_X + Consts.DISTANCE_BETWEEN_TILES * _tileIndex[1];
+        var y = Consts.TILE_COORD_Y + Consts.DISTANCE_BETWEEN_TILES * _tileIndex[0];
+        var tile = new Tile( this.tilesGroup, x, y, _tileIndex )
+        this.tilesOnField[_tileIndex[0]][_tileIndex[1]] = tile;
+        this.tilesObj.push( tile );
+    };
+
     Game.prototype.onClickDown = function( _evt ) {
+        if ( this.animation ) {
+            return;
+        }
         console.log(this);
         this.eventClickX = Math.floor( _evt.data.global.x );
         this.eventClickY = Math.floor( _evt.data.global.y );
     };
 
     Game.prototype.onClickUp = function( _evt ) {
+        if ( this.animation ) {
+            return;
+        }
         var x = Math.floor( _evt.data.global.x );
         var y = Math.floor( _evt.data.global.y );
         var diffX = Math.abs( this.eventClickX - x );
@@ -160,6 +172,7 @@
     };
 
     Game.prototype.tileHandlerLeft = function( _tile, _arr, _numpos ) {
+        this.spawnTileSys = true;
         var moveTo = true;
         var x = 0;
         for ( var i = _numpos-1; i >= 0; i-- ) {
@@ -168,7 +181,7 @@
                 _arr[i] = _tile;
                 _arr[i+1] = null;
             } else {
-                if ( _tile.count == _arr[i].count ) {
+                if ( _tile.count == _arr[i].count && !_tile.merge && !_arr[i].merge ) {
                     x -= Consts.DISTANCE_BETWEEN_TILES;
                     _tile = this.mergeTiles( _arr[i], _tile, x, null );//new tile continues handling
                     _arr[i] = _tile;
@@ -180,13 +193,14 @@
                 }
             }
         }
-        if ( moveTo ) {
+        if ( moveTo && x != 0 ) {
             x = _tile.x + x;
             _tile.move( x );
         }
     };
 
     Game.prototype.tileHandlerRight = function( _tile, _arr, _numpos ) {
+        this.spawnTileSys = true;
         var moveTo = true;
         var x = 0;
         for ( var i = _numpos+1; i < _arr.length; i++ ) {
@@ -195,7 +209,7 @@
                 _arr[i] = _tile;
                 _arr[i-1] = null;
             } else {
-                if ( _tile.count == _arr[i].count ) {
+                if ( _tile.count == _arr[i].count && !_tile.merge && !_arr[i].merge ) {
                     x += Consts.DISTANCE_BETWEEN_TILES;
                     _tile = this.mergeTiles( _arr[i], _tile, x, null );//new tile continues handling
                     _arr[i] = _tile;
@@ -207,13 +221,14 @@
                 }
             }
         }
-        if ( moveTo ) {
+        if ( moveTo && x != 0 ) {
             x = _tile.x + x;
             _tile.move( x );
         }
     };
 
     Game.prototype.tileHandlerDown = function( _tile, _arr, _numpos, _columnNum ) {
+        this.spawnTileSys = true;
         var moveTo = true;
         var y = 0;
         for ( var i = _numpos+1; i < _arr.length; i++ ) {
@@ -222,7 +237,7 @@
                 _arr[i][_columnNum] = _tile;
                 _arr[i-1][_columnNum] = null;
             } else {
-                if ( _tile.count == _arr[i][_columnNum].count ) {
+                if ( _tile.count == _arr[i][_columnNum].count && !_tile.merge && !_arr[i][_columnNum].merge ) {
                     y += Consts.DISTANCE_BETWEEN_TILES;
                     _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile, null, y );//new tile continues handling
                     _arr[i][_columnNum] = _tile;
@@ -234,13 +249,14 @@
                 }
             }
         }
-        if ( moveTo ) {
+        if ( moveTo && y != 0 ) {
             y = _tile.y + y;
             _tile.move( null, y );
         }
     };
 
     Game.prototype.tileHandlerUp = function( _tile, _arr, _numpos, _columnNum ) {
+        this.spawnTileSys = true;
         var moveTo = true;
         var y = 0;
         for ( var i = _numpos-1; i >= 0; i-- ) {
@@ -249,7 +265,7 @@
                 _arr[i][_columnNum] = _tile;
                 _arr[i+1][_columnNum] = null;
             } else {
-                if ( _tile.count == _arr[i][_columnNum].count ) {
+                if ( _tile.count == _arr[i][_columnNum].count && !_tile.merge && !_arr[i][_columnNum].merge ) {
                     y -= Consts.DISTANCE_BETWEEN_TILES;
                     _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile, null, y );//new tile continues handling
                     _arr[i][_columnNum] = _tile;
@@ -261,13 +277,15 @@
                 }
             }
         }
-        if ( moveTo ) {
+        if ( moveTo && y != 0 ) {
             y = _tile.y + y;
             _tile.move( null, y );
         }
     };
 
     Game.prototype.mergeTiles = function( _absorbe, _infuse, _x, _y ) {
+        _absorbe.merge = true;
+        _infuse.merge = true;
         _absorbe.count = _infuse.count + _absorbe.count;//write new count in tile
         var onMoveComplete = function() {//destroy old tile and show new tile
             _infuse.destroy();//destroy tile sprite
@@ -280,4 +298,19 @@
         _infuse.move( _x, _y, null, onMoveComplete );
         //there should be a code that adds the value of the tiles to the score
         return _absorbe;
+    };
+
+    Game.prototype.renewalObjectTiles = function() {
+        console.log(this.tilesObj.length);
+        var rere = 0;
+        for ( var i = 0; i < this.tilesObj.length; i++ ) {
+            if ( this.tilesObj[i].sprite == null && this.tilesObj[i].count == null ) {
+                this.tilesObj.splice( i, 1 );
+                i--;
+            } else if ( this.tilesObj[i].merge ) {
+                this.tilesObj[i].merge = false;
+            }
+            rere++;
+        }
+        console.log(rere);
     };
