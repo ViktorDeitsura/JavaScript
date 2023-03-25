@@ -125,6 +125,7 @@
                     }
                 }
             }
+            console.log("makeStep LEFT");
         } else if ( _direction == Consts.STEP_DIRECTION_RIGHT ) {
             for ( var j = 0; j < this.tilesOnField.length; j++ ) {
                 for ( var i = this.tilesOnField[j].length-1; i >= 0; i-- ) {
@@ -134,14 +135,32 @@
                     }
                 }
             }
+            console.log("makeStep RIGHT");
         } else if ( _direction == Consts.STEP_DIRECTION_DOWN ) {
-
+            for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+                for ( var i = this.tilesOnField.length-1; i >= 0; i-- ) {
+                    var tile = this.tilesOnField[i][j];
+                    if ( tile != null && i != 3 ) {
+                        this.tileHandlerDown( tile, this.tilesOnField, i, j );
+                    }
+                }
+            }
+            console.log("makeStep DOWN");
         } else if ( _direction == Consts.STEP_DIRECTION_UP ) {
-
+            for ( var j = 0; j < this.tilesOnField.length; j++ ) {
+                for ( var i = 0; i < this.tilesOnField.length; i++ ) {
+                    var tile = this.tilesOnField[i][j];
+                    if ( tile != null && i != 0 ) {
+                        this.tileHandlerUp( tile, this.tilesOnField, i, j );
+                    }
+                }
+            }
+            console.log("makeStep UP");
         }
     };
 
     Game.prototype.tileHandlerLeft = function( _tile, _arr, _numpos ) {
+        var moveTo = true;
         var x = 0;
         for ( var i = _numpos-1; i >= 0; i-- ) {
             if ( _arr[i] == null ) {
@@ -150,18 +169,25 @@
                 _arr[i+1] = null;
             } else {
                 if ( _tile.count == _arr[i].count ) {
-                    _tile = this.mergeTiles( _arr[i] ,_tile );//new tile continues handling
+                    x -= Consts.DISTANCE_BETWEEN_TILES;
+                    _tile = this.mergeTiles( _arr[i], _tile, x, null );//new tile continues handling
+                    _arr[i] = _tile;
+                    _arr[i+1] = null;
                     x = 0;//reset value
+                    moveTo = true;
                 } else {
                     break;
                 }
             }
         }
-        x = _tile.x + x;
-        _tile.move( x );
+        if ( moveTo ) {
+            x = _tile.x + x;
+            _tile.move( x );
+        }
     };
 
     Game.prototype.tileHandlerRight = function( _tile, _arr, _numpos ) {
+        var moveTo = true;
         var x = 0;
         for ( var i = _numpos+1; i < _arr.length; i++ ) {
             if ( _arr[i] == null ) {
@@ -170,18 +196,25 @@
                 _arr[i-1] = null;
             } else {
                 if ( _tile.count == _arr[i].count ) {
-                    _tile = this.mergeTiles( _arr[i], _tile );//new tile continues handling
+                    x += Consts.DISTANCE_BETWEEN_TILES;
+                    _tile = this.mergeTiles( _arr[i], _tile, x, null );//new tile continues handling
+                    _arr[i] = _tile;
+                    _arr[i-1] = null;
                     x = 0;//reset value
+                    moveTo = false;
                 } else {
                     break;
                 }
             }
         }
-        x = _tile.x + x;
-        _tile.move( x );
+        if ( moveTo ) {
+            x = _tile.x + x;
+            _tile.move( x );
+        }
     };
 
     Game.prototype.tileHandlerDown = function( _tile, _arr, _numpos, _columnNum ) {
+        var moveTo = true;
         var y = 0;
         for ( var i = _numpos+1; i < _arr.length; i++ ) {
             if ( _arr[i][_columnNum] == null ) {
@@ -190,18 +223,25 @@
                 _arr[i-1][_columnNum] = null;
             } else {
                 if ( _tile.count == _arr[i][_columnNum].count ) {
-                    _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile );//new tile continues handling
+                    y += Consts.DISTANCE_BETWEEN_TILES;
+                    _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile, null, y );//new tile continues handling
+                    _arr[i][_columnNum] = _tile;
+                    _arr[i-1][_columnNum] = null;
                     y = 0;//reset value
+                    moveTo = false;
                 } else {
                     break;
                 }
             }
         }
-        y = _tile.y + y;
-        _tile.move( null, y );
+        if ( moveTo ) {
+            y = _tile.y + y;
+            _tile.move( null, y );
+        }
     };
 
     Game.prototype.tileHandlerUp = function( _tile, _arr, _numpos, _columnNum ) {
+        var moveTo = true;
         var y = 0;
         for ( var i = _numpos-1; i >= 0; i-- ) {
             if ( _arr[i][_columnNum] == null ) {
@@ -210,13 +250,34 @@
                 _arr[i+1][_columnNum] = null;
             } else {
                 if ( _tile.count == _arr[i][_columnNum].count ) {
-                    _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile );//new tile continues handling
+                    y -= Consts.DISTANCE_BETWEEN_TILES;
+                    _tile = this.mergeTiles( _arr[i][_columnNum] ,_tile, null, y );//new tile continues handling
+                    _arr[i][_columnNum] = _tile;
+                    _arr[i+1][_columnNum] = null;
                     y = 0;//reset value
+                    moveTo = false;
                 } else {
                     break;
                 }
             }
         }
-        y = _tile.y + y;
-        _tile.move( null, y );
+        if ( moveTo ) {
+            y = _tile.y + y;
+            _tile.move( null, y );
+        }
+    };
+
+    Game.prototype.mergeTiles = function( _absorbe, _infuse, _x, _y ) {
+        _absorbe.count = _infuse.count + _absorbe.count;//write new count in tile
+        var onMoveComplete = function() {//destroy old tile and show new tile
+            _infuse.destroy();//destroy tile sprite
+            _absorbe.show();//update tile sprite
+        };
+        _infuse.count = null;
+        _infuse.position = null;
+        _y = _infuse.y + _y;
+        _x = _infuse.x + _x;
+        _infuse.move( _x, _y, null, onMoveComplete );
+        //there should be a code that adds the value of the tiles to the score
+        return _absorbe;
     };
