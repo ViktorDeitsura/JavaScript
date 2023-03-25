@@ -25,6 +25,7 @@
         windowGame.sortableChildren = true;
         Main.windowGame = windowGame;
 
+        ScorePanel.init( windowGame );
         Main.game = new Game( windowGame );//create game object
         Main.game.init();
 

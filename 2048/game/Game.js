@@ -1,6 +1,6 @@
-    var Game = function( _windowGame ) {
+    var Game = function( _windowGameGroup ) {
         var group = new PIXI.Container();//create new Container
-        _windowGame.addChild( group );//Add container on stage
+        _windowGameGroup.addChild( group );//Add container on stage
         group.zIndex = GameData.zIndex++;
         group.sortableChildren = true;
 
@@ -14,6 +14,7 @@
         this.tilesObj = [];
         this.spawnTileSys = false;
         this.animation = false;
+        this.countScore = 0;
     };
 
     Game.prototype.init = function() {
@@ -298,7 +299,7 @@
         _y = _infuse.y + _y;
         _x = _infuse.x + _x;
         _infuse.move( _x, _y, null, onMoveComplete );
-        //there should be a code that adds the value of the tiles to the score
+        this.countScore += _absorbe.count;//adds the value of the tiles to the score
         return _absorbe;
     };
 
@@ -373,6 +374,14 @@
         this.tilesObj = [];
         this.spawnTileSys = false;
         this.animation = false;
+        this.countScore = 0;
 
         this.init();
     };
+
+    Object.defineProperty( Game.prototype, "countScore", {
+        get: function() { return ScorePanel.countScore; },
+        set: function( val ) {
+			ScorePanel.countScore = val;
+        }
+    });

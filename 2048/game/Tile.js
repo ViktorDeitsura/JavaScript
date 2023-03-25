@@ -5,7 +5,7 @@
         group.sortableChildren = true;
         this.group = group;
 
-        this.count = Math.random() > 0.5 ? 2 : 4;
+        this.count = Math.random() > 0.1 ? 2 : 4;
         this.group.self = this;
 
         this.init( _x, _y, _pos );
